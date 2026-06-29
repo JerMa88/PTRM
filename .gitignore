@@ -1,3 +1,7 @@
+#Project specific
+models/
+
+# Python gitignore template from GitHub
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
