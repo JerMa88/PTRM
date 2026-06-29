@@ -1,5 +1,7 @@
 #Project specific
 models/
+data/
+.venv/ 
 
 # Python gitignore template from GitHub
 # Byte-compiled / optimized / DLL files
@@ -22,7 +24,7 @@ lib/
 lib64/
 parts/
 sdist/
-var/
+var/~
 wheels/
 share/python-wheels/
 *.egg-info/
