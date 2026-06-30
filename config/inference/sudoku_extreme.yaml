@@ -1,0 +1,29 @@
+# PTRM Inference Configuration: Sudoku-Extreme
+# Matches Table 1 from arXiv:2605.19943
+#
+# Model: TRM-MLP (5M params, H=3, L=6, MLP transition)
+# Dataset: Sudoku-Extreme (9x9, vocab=11, seq_len=81)
+# PTRM paper reports: pass@25 = 92.3%, best-Q@25 = 65.3%
+
+model:
+  manifest_path: models/sudoku/manifest.yaml
+  checkpoint_override: null  # Uses default (model_mlp.pt)
+
+data:
+  path: data/sudoku
+  split: test
+  max_samples: null  # Evaluate full test set
+
+ptrm:
+  K: 25          # Number of parallel rollouts
+  D: 16          # Supervision steps (paper uses 16 for Sudoku)
+  sigma: 0.3     # Noise std (paper's default)
+  seed: 42       # For reproducibility
+
+evaluation:
+  batch_size: 32
+  ignore_id: 0   # PAD token
+  collect_trajectories: false
+  k_chunk_size: null  # Process all K at once (set to 5 for low-memory GPUs)
+
+device: cuda

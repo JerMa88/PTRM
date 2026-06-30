@@ -1,0 +1,29 @@
+# PTRM Inference Configuration: ARC-AGI-2
+# Matches Table 1 from arXiv:2605.19943
+#
+# Model: TRM-Att (5M params, H=3, L=4, attention transition, RoPE)
+# Dataset: ARC-AGI v2 (30x30 padded, vocab=12, seq_len=900)
+# PTRM paper reports: pass@25 = 35.4%, best-Q@25 = 24.1%
+
+model:
+  manifest_path: models/arc_v2/manifest.yaml
+  checkpoint_override: null
+
+data:
+  path: data/arc
+  split: test   # "evaluation" split from ARC, renamed to "test" by builder
+  max_samples: null
+
+ptrm:
+  K: 25
+  D: 64          # Paper uses D=64 for ARC (harder puzzles need more steps)
+  sigma: 0.3
+  seed: 42
+
+evaluation:
+  batch_size: 8    # Small batch due to high K × long sequences
+  ignore_id: 0
+  collect_trajectories: false
+  k_chunk_size: 5  # Chunk rollouts for memory efficiency
+
+device: cuda
