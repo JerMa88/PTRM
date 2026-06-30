@@ -1,6 +1,7 @@
 #Project specific
 models/
 data/
+checkpoints/
 .venv/ 
 
 # Python gitignore template from GitHub

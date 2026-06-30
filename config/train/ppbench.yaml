@@ -1,0 +1,52 @@
+# PPBench TRM-Att Training Config
+# Exact replication of arXiv:2605.19943, Appendix A.2-A.3
+#
+# Model: TRM-Att (7M params)
+# Data: PPBench 6 types (sudoku, lightup, nurikabe, shakashaka, heyawake, tapa)
+# seq_len=100, vocab_size=294
+#
+# "All experiments use the standard TRM backbone with the released architecture
+#  and training recipes." — Paper Appendix A.2
+
+defaults:
+  - arch: trm
+  - _self_
+
+hydra:
+  output_subdir: null
+
+# Data paths (relative to TinyRecursiveModels/ working directory)
+data_paths: ['../data/ppbench']
+data_paths_test: []
+
+# No TRM-native evaluator — we use wandb custom logging instead
+evaluators: []
+
+# Training hyperparameters — identical to TRM's cfg_pretrain.yaml
+global_batch_size: 768
+epochs: 100000
+eval_interval: 10000
+checkpoint_every_eval: True
+
+lr: 1e-4
+lr_min_ratio: 1.0
+lr_warmup_steps: 2000
+
+# Standard LM hyperparameters (same as Llama / original TRM)
+beta1: 0.9
+beta2: 0.95
+weight_decay: 0.1
+puzzle_emb_weight_decay: 0.1
+
+# Puzzle embedding learning rate
+puzzle_emb_lr: 1e-2
+
+seed: 0
+min_eval_interval: 0
+
+ema: False
+ema_rate: 0.999
+freeze_weights: False
+
+# W&B project naming
+project_name: "ptrm-ppbench-training"
