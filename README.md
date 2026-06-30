@@ -8,6 +8,19 @@ PTRM transforms pre-trained Tiny Recursive Models (TRM) into probabilistic reaso
 
 TRM models recursively refine latent states `z_H` and `z_L` to solve structured puzzles. PTRM adds noise (`z_H += ε, ε ~ N(0, σ²I)`) before each supervision step, then runs **K parallel rollouts** and selects the best solution using the model's own Q-head (**best-Q@K**).
 
+## TRM vs PTRM Architecture
+
+PTRM is an **inference-time only** wrapper around a TRM model. The underlying model weights are identical; the difference is entirely in how the latent space is traversed during inference.
+
+| Feature | TRM (Baseline) | PTRM |
+|:---|:---|:---|
+| **Inference Path** | Single, deterministic trajectory | $K$ parallel, stochastic trajectories |
+| **Latent State ($z_H$)** | $z_H^{(t)} = f(z_H^{(t-1)}, x)$ | $z_H^{(t)} = f(z_H^{(t-1)} + \varepsilon, x)$ where $\varepsilon \sim \mathcal{N}(0, \sigma^2 I)$ |
+| **Output Selection** | Single fixed-point attractor | **best-Q@K** or **mode@K** |
+| **Output Confidence** | Single Q-head logit | Selection based on maximum Q-head logit across $K$ rollouts |
+| **Training Required?**| Yes | **No** (Zero-shot application to pre-trained TRMs) |
+| **Compute Cost** | $O(D)$ | $O(K \times D)$ (Embarrassingly parallelizable) |
+
 ## Setup
 
 ```bash
