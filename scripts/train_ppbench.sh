@@ -132,25 +132,8 @@ log_info "Checkpoint dir: ${CHECKPOINT_DIR}"
 log_info "GPUs: ${NUM_GPUS}"
 echo ""
 
-# Check for CUDA
-if python3 -c "import torch; assert torch.cuda.is_available()" 2>/dev/null; then
-    GPU_NAME=$(python3 -c "import torch; print(torch.cuda.get_device_name(0))")
-    GPU_MEM=$(python3 -c "import torch; print(f'{torch.cuda.get_device_properties(0).total_mem / 1e9:.1f}GB')")
-    log_ok "CUDA available: ${GPU_NAME} (${GPU_MEM})"
-else
-    log_error "CUDA not available! Training requires a GPU."
-    exit 1
-fi
-
-# Check for W&B login
-if ! python3 -c "import wandb; wandb.Api()" 2>/dev/null; then
-    log_warn "W&B not logged in. Run 'wandb login' first."
-    read -p "Continue without W&B? [y/N] " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        exit 1
-    fi
-fi
+# GPU/W&B checks are deferred until training step (below)
+# so that --data-only works on CPU-only machines
 
 # =============================================================================
 # Step 1: Build PPBench Dataset
@@ -179,6 +162,29 @@ fi
 if [ "$DATA_ONLY" = true ]; then
     log_ok "Data-only mode. Exiting."
     exit 0
+fi
+
+# =============================================================================
+# Pre-flight: GPU & W&B checks (only needed for training)
+# =============================================================================
+
+if python3 -c "import torch; assert torch.cuda.is_available()" 2>/dev/null; then
+    GPU_NAME=$(python3 -c "import torch; print(torch.cuda.get_device_name(0))")
+    GPU_MEM=$(python3 -c "import torch; print(f'{torch.cuda.get_device_properties(0).total_mem / 1e9:.1f}GB')")
+    log_ok "CUDA available: ${GPU_NAME} (${GPU_MEM})"
+else
+    log_error "CUDA not available! Training requires a GPU."
+    log_info "Run 'bash scripts/train_ppbench.sh --data-only' to build the dataset without a GPU."
+    exit 1
+fi
+
+if ! python3 -c "import wandb; wandb.Api()" 2>/dev/null; then
+    log_warn "W&B not logged in. Run 'wandb login' first."
+    read -p "Continue without W&B? [y/N] " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        exit 1
+    fi
 fi
 
 # =============================================================================
